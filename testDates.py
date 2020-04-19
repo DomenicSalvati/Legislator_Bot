@@ -14,7 +14,9 @@ yes = {}
 no = {}
 noVote = []
 billData =[]
-
+statusText = ''
+perfectMatch = False
+name = 'name'
 
 polName, billSearch = 'Warren', 'Cares'
 for i in range(0,20):
@@ -30,6 +32,8 @@ for doc in bills:
             if config.nameMatch(searchName, members['name']):
                 if members['name'] is not None:
                     printName = members['name']
+                    if config.nameMatch(searchName, members['name']) == 10:
+                        perfectMatch = True
                 if members['vote_position'].lower()[0] == 'n' and doc.name is not None:
                     if printName in no:
                         no.update({printName : no[printName] + [doc.name + ' (' + doc.voteDates[i] + ')']})
@@ -41,12 +45,41 @@ for doc in bills:
                     else:
                         yes[printName] = [doc.name + ' (' + doc.voteDates[i] + ')']
 
- 
-print(yes)
-print(no)                     
+if perfectMatch:
+    for key in yes.copy():
+        if key.lower() != searchName.lower():
+            yes.pop(key)
+    for key in no.copy():
+        if key.lower() != searchName.lower():
+            no.pop(key)
 
-#yes = list(dict.fromkeys(yes))
-#no = list(dict.fromkeys(no))
+
+if len(yes) == 1 and len(no) == 1:
+    statusText = ', '.join(list(yes.keys())) + ' voted yes on: ' + ', '.join(list(yes.values())[0]) + ', and no on: ' + ', '.join(list(no.values())[0])
+elif len(yes) == 1 and len(no) == 0:
+    statusText = ','.join(list(yes.keys())) + ' voted yes on: ' + ', '.join(list(yes.values())[0]) + ', and did not vote no on any related bills.'
+elif len(yes) == 0 and len(no) == 1:
+    statusText = ','.join(list(no.keys())) + ' voted no on: ' + ', '.join(list(no.values())[0]) + ', and did not vote yes on any related bills.'
+elif len(yes) > 1 or len(no) > 1:
+    for key in yes:
+        statusText = statusText + key + ' voted yes on ' + ', '.join(yes[key]) + '. '
+    for key in no:
+        statusText = statusText + key + ' voted no on ' + ', '.join(no[key]) + '. '
+elif len(yes) == 0 and len(no) == 0:
+    statusText = 'No voting records found based on input.'
+    
+
+tweetText = []
+if len(statusText) > 280 - (len(name) + 1):
+    tweetText = [statusText[i:i+230] for i in range(0, len(statusText), 230)]
+    for i in range(len(tweetText)):
+        tweetText[i] = '@' + name + ' ' + str(i+1) + '/' + str(len(tweetText)) + ' ' + tweetText[i]
+
+for i in range(len(tweetText)):
+    print(tweetText[i])
+    
+    
+
            
 #yes = ', '.join(yes)
 #no = ', '.join(no)

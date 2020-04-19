@@ -17,6 +17,7 @@ def check_mentions(api, since_id):
     yes = []
     no = []
     noVote = []
+    perfectMatch = False
     billData = []
     for tweet in tweepy.Cursor(api.mentions_timeline,
         since_id=since_id).items():
@@ -34,31 +35,62 @@ def check_mentions(api, since_id):
         for doc in bills:
             doc.getData()
             doc.getVotes()
-            for pos in doc.positions:
-                for members in pos:
+            for i in range(len(doc.positions)):
+                for members in doc.positions[i]:
                     if config.nameMatch(searchName, members['name']):
                         if members['name'] is not None:
                             printName = members['name']
-                        if members['vote_position'].lower() == 'no' and doc.name is not None:
-                           no.append(doc.name)
-                        elif members['vote_position'].lower() == 'yes' and doc.name is not None:
-                           yes.append(doc.name)
-                    
-        yes = list(dict.fromkeys(yes))
-        no = list(dict.fromkeys(no))
-        yes = ', '.join(yes)
-        no = ', '.join(no)
-        noVote = ', '.join(noVote)  
-        if len(no + yes) == 0:
-            statusText = '@' + str(tweet.user.screen_name) + ' No roll call votes were taken on that topic.'
-        else:
-            statusText ='@' + str(tweet.user.screen_name) + ' ' + str(printName) + ' voted yes on: ' + str(yes) + ' and no on: ' + str(no) 
-        if len(statusText) > 279:
-            statusText = statusText[0:279]
-        print(statusText)
-        api.update_status(
-            status=statusText, 
-        )
+                            if config.nameMatch(searchName, members['name']) == 10:
+                                perfectMatch = True
+                        if members['vote_position'].lower()[0] == 'n' and doc.name is not None:
+                            if printName in no:
+                                no.update({printName : no[printName] + [doc.name + ' (' + doc.voteDates[i] + ')']})
+                            else:
+                                no[printName] = [doc.name + ' (' + doc.voteDates[i] + ')']
+                        elif members['vote_position'].lower()[0] == 'y' and doc.name is not None:
+                            if printName in yes:
+                                yes.update({printName : yes[printName] + [doc.name + ' (' + doc.voteDates[i] + ')']})
+                            else:
+                                yes[printName] = [doc.name + ' (' + doc.voteDates[i] + ')']
+        
+        if perfectMatch:
+            for key in yes.copy():
+                if key.lower() != searchName.lower():
+                    yes.pop(key)
+            for key in no.copy():
+                if key.lower() != searchName.lower():
+                    no.pop(key)
+        
+        
+        if len(yes) == 1 and len(no) == 1:
+            statusText = ', '.join(list(yes.keys())) + ' voted yes on: ' + ', '.join(list(yes.values())[0]) + ', and no on: ' + ', '.join(list(no.values())[0])
+        elif len(yes) == 1 and len(no) == 0:
+            statusText = ','.join(list(yes.keys())) + ' voted yes on: ' + ', '.join(list(yes.values())[0]) + ', and did not vote no on any related bills.'
+        elif len(yes) == 0 and len(no) == 1:
+            statusText = ','.join(list(no.keys())) + ' voted no on: ' + ', '.join(list(no.values())[0]) + ', and did not vote yes on any related bills.'
+        elif len(yes) > 1 or len(no) > 1:
+            for key in yes:
+                statusText = statusText + key + ' voted yes on ' + ', '.join(yes[key]) + '. '
+            for key in no:
+                statusText = statusText + key + ' voted no on ' + ', '.join(no[key]) + '. '
+        elif len(yes) == 0 and len(no) == 0:
+            statusText = 'No voting records found based on input.'
+            
+        
+        tweetText = []
+        if len(statusText) > 280 - (len(tweet.user.screen_name) + 1):
+            tweetText = [statusText[i:i+230] for i in range(0, len(statusText), 230)]
+            for i in range(len(tweetText)):
+                tweetText[i] = '@' + str(tweet.user.screen_name) + ' ' + str(i+1) + '/' + str(len(tweetText)) + ' ' + tweetText[i]
+        
+        
+        
+        
+        for i in range(len(tweetText)):
+            api.update_status(
+                status=tweetText[i], 
+            )
+            time.sleep(5)
 
     return new_since_id
 
@@ -72,7 +104,7 @@ def main():
         logFile = open('log.txt', 'w')
         logFile.write(str(since_id))
         logFile.close()
-        time.sleep(60)
+        time.sleep(30)
 
 if __name__ == "__main__":
     main()
