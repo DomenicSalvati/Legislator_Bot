@@ -1,6 +1,7 @@
 import requests
 import json
 import re
+import string
 
 def auth():
     auth = {'X-API-Key': 'E5MeRxAT2fy2ogbEpaOYWFpY3jsVWlRcN0tS6AiC'}
@@ -17,14 +18,18 @@ def initSearch(search,offset):
         billID.append(pythonData['results'][0]['bills'][i]['bill_id'].split('-'))
     return billID
 
-def nameMatch(pattern, string):
+def nameMatch(pattern, patternMatch):
     score = 0
     patternLower = pattern.lower()
-    stringLower = string.lower()
+    stringLower = patternMatch.lower()
+    patternLower = patternLower.strip()
+    stringLower = stringLower.strip()
+    patternLower.strip(string.punctuation)
     if patternLower == stringLower:
         return 10
     splitName = patternLower.split(' ')
     for name in splitName:
-        if re.findall(name, stringLower):
-            score += 1
+        if not name.isspace() and len(name) != 0:
+            if re.findall(name, stringLower):
+                score += 1
     return score

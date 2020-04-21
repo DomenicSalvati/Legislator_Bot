@@ -14,11 +14,13 @@ def check_mentions(api, since_id):
     logger.info("Retrieving mentions")
     new_since_id = since_id
     bills = []
-    yes = []
-    no = []
+    yes = {}
+    no = {}
     noVote = []
     perfectMatch = False
     billData = []
+    statusText = ''
+    tweetText = []
     for tweet in tweepy.Cursor(api.mentions_timeline,
         since_id=since_id).items():
 
@@ -77,7 +79,7 @@ def check_mentions(api, since_id):
             statusText = 'No voting records found based on input.'
             
         
-        tweetText = []
+        
         if len(statusText) > 280 - (len(tweet.user.screen_name) + 1):
             tweetText = [statusText[i:i+230] for i in range(0, len(statusText), 230)]
             for i in range(len(tweetText)):
@@ -97,7 +99,7 @@ def check_mentions(api, since_id):
 def main():
     api = create_api()
     logFile = open('log.txt', 'r+')
-    since_id = logFile.read()
+    since_id = int(logFile.read())
     while True:
         since_id = check_mentions(api, since_id)
         logger.info("Waiting...")
