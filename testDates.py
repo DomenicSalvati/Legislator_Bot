@@ -18,7 +18,7 @@ statusText = ''
 perfectMatch = False
 name = 'name'
 
-polName, billSearch = 'klobuchar', 'firearms'
+polName, billSearch = 'elizabeth warren', 'cares'
 for i in range(0,30):
     billData += config.initSearch(billSearch,20*i)
 searchName = polName.lower().replace('@legislatorb', '')

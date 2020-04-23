@@ -5,6 +5,7 @@ import time
 import config
 import bill
 import re 
+import string
 
 
 logging.basicConfig(level=logging.INFO)
@@ -54,7 +55,8 @@ def check_mentions(api, since_id):
                                 yes.update({printName : yes[printName] + [doc.name + ' (' + doc.voteDates[i] + ')']})
                             else:
                                 yes[printName] = [doc.name + ' (' + doc.voteDates[i] + ')']
-        
+        searchName = searchName.strip()
+        searchName = searchName.strip(string.punctuation)
         if perfectMatch:
             for key in yes.copy():
                 if key.lower() != searchName.lower():
@@ -62,7 +64,7 @@ def check_mentions(api, since_id):
             for key in no.copy():
                 if key.lower() != searchName.lower():
                     no.pop(key)
-        
+        print(yes)
         
         if len(yes) == 1 and len(no) == 1:
             statusText = ', '.join(list(yes.keys())) + ' voted yes on: ' + ', '.join(list(yes.values())[0]) + ', and no on: ' + ', '.join(list(no.values())[0])
@@ -85,7 +87,7 @@ def check_mentions(api, since_id):
             for i in range(len(tweetText)):
                 tweetText[i] = '@' + str(tweet.user.screen_name) + ' ' + str(i+1) + '/' + str(len(tweetText)) + ' ' + tweetText[i]
         else:
-            tweetText = '@' + str(tweet.user.screen_name) + statusText
+            tweetText = '@' + str(tweet.user.screen_name) + ' ' + statusText
         
         
         if type(tweetText) == list:
