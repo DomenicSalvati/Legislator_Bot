@@ -8,8 +8,7 @@ import re
 
 api = create_api()
 timeline = tweepy.Cursor(api.user_timeline).items()
-deletion_count = 0
-ignored_count = 0
+
  
 for tweet in timeline:
     api.destroy_status(tweet.id)
