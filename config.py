@@ -9,7 +9,7 @@ def auth():
 
 def initSearch(search,offset):
     #request = 'https://api.propublica.org/congress/v1/bills/search.json?query=' + str(search) + '&sort=_score'
-    request = 'https://api.propublica.org/congress/v1/bills/search.json?query=' + str(search) + '&sort=date&offset=' + str(offset)
+    request = 'https://api.propublica.org/congress/v1/bills/search.json?query=' + str(search) + '&sort=_score&offset=' + str(offset)
     data = requests.get(request, headers = auth())
     jsonData = data.text
     pythonData = json.loads(jsonData)

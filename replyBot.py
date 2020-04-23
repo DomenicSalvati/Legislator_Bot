@@ -84,15 +84,20 @@ def check_mentions(api, since_id):
             tweetText = [statusText[i:i+230] for i in range(0, len(statusText), 230)]
             for i in range(len(tweetText)):
                 tweetText[i] = '@' + str(tweet.user.screen_name) + ' ' + str(i+1) + '/' + str(len(tweetText)) + ' ' + tweetText[i]
+        else:
+            tweetText = '@' + str(tweet.user.screen_name) + statusText
         
         
-        
-        
-        for i in range(len(tweetText)):
+        if type(tweetText) == list:
+            for i in range(len(tweetText)):
+                api.update_status(
+                    status=tweetText[i], 
+                )
+                time.sleep(5)
+        else:
             api.update_status(
-                status=tweetText[i], 
-            )
-            time.sleep(5)
+                    status=tweetText, 
+                )
 
     return new_since_id
 

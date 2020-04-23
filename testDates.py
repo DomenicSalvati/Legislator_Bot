@@ -18,8 +18,8 @@ statusText = ''
 perfectMatch = False
 name = 'name'
 
-polName, billSearch = 'Elizabeth Warren', 'Cares'
-for i in range(0,20):
+polName, billSearch = 'klobuchar', 'firearms'
+for i in range(0,30):
     billData += config.initSearch(billSearch,20*i)
 searchName = polName.lower().replace('@legislatorb', '')
 for data in billData:
@@ -74,10 +74,14 @@ if len(statusText) > 280 - (len(name) + 1):
     tweetText = [statusText[i:i+230] for i in range(0, len(statusText), 230)]
     for i in range(len(tweetText)):
         tweetText[i] = '@' + name + ' ' + str(i+1) + '/' + str(len(tweetText)) + ' ' + tweetText[i]
+else:
+    tweetText = '@' + name + statusText
 
-for i in range(len(tweetText)):
-    print(tweetText[i])
-    
+if type(tweetText) == list:
+    for i in range(len(tweetText)):
+        print(tweetText[i])
+else:
+    print(tweetText)
     
 
            
