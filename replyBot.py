@@ -57,6 +57,9 @@ def check_mentions(api, since_id):
                                 yes[printName] = [doc.name + ' (' + doc.voteDates[i] + ')']
         searchName = searchName.strip()
         searchName = searchName.strip(string.punctuation)
+        print(searchName)
+        print(yes)
+        print(no)
         if perfectMatch:
             for key in yes.copy():
                 if key.lower() != searchName.lower():
